@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+- '0.10'
+before_install: npm install -g mocha
+deploy:
+    provider: heroku
+    api_key:
+        secure: V+5D1SsBAFYnSq29dtNFiiZdupkc2OsBZReYuL1TltN7cXeJ7/WB8OsdJkf12Hh6HwidhGTqP6f3CC7MVzHCi7gEOHGE15xDLF0prJPKBri8xLg+/51FrRkyRmo3dwVA58d5BaTdmTFlWJtReG5fYLRpv3PjiVeRuE0TaEYfp8M=
+    app: list-organizer
