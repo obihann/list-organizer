@@ -7,16 +7,14 @@ var twitter = new twitterAPI({
     consumerSecret: 'iRbfp6Q00hDv2jvRtWzzyAq5XklpaVfvEVJ9kcgr4Ip0OrU03m',
     callback: 'http://list-organizer.herokuapp.com/callback'
 });
-var redis = require('redis'), 
-    client = redis.createClient();
-
-client.on("error", function (err) {
-    console.log("Error " + err);
-});
-
+var redis = require('redis')
+    ,client = redis.createClient();
+var session = require('express-session')
+    ,RedisStore = require('connect-redis')(session);
 var express = require('express');
 var app = express();
 
+app.use(session({ store: new RedisStore(), secret: 'keyboard cat' }));
 app.use(express.static(__dirname + '/public'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -34,14 +32,15 @@ app.get('/signin', function(req, res) {
         if (error) {
             res.render('index', { title: title, message: JSON.stringify(error)})
         } else {
+            req.session.requestToken = requestToken;
+            req.session.requestTokenSecret = requestToken;
             res.redirect('https://twitter.com/oauth/authenticate?oauth_token='+requestToken);
         }
     });
 });
 
 app.get('/callback', function(req, res) {
-    console.log(req.query);
-    twitter.getAccessToken(requestToken, requestTokenSecret, oauth_verifier, function(error, accessToken, accessTokenSecret, results) {
+    twitter.getAccessToken(req.session.requestToken, req.session.requestTokenSecret, req.query.oauth_verifier, function(error, accessToken, accessTokenSecret, results) {
         if (error) {
             res.render('index', { title: title, message: JSON.stringify(error)})
         } else {
