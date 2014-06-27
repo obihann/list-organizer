@@ -43,7 +43,9 @@ app.get('/callback', function(req, res) {
         if (error) {
             res.render('index', { title: title, message: JSON.stringify(error)})
         } else {
-            res.render('index', { title: title, message: 'Look what we did'})
+            twitter.friends('list', , accessToken, accessTokenSecret, function(error, data, response) {
+                res.render('index', { title: title, message: JSON.stringify(data)})
+            });
         }
     });
 });
