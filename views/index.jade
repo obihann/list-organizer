@@ -2,6 +2,10 @@ doctype
 head
     link(rel='stylesheet', href='/vendor/bootstrap/css/bootstrap.min.css')
 body
-    block content
-        h1= title
-        p= message 
+    header.navbar
+            h1.text-center.bg-primary= title
+    .container
+        .row
+            .col-xs-4.col-xs-offset-4
+                p.text-center= message 
+                a(href='/signin', class='btn btn-default') Sign In With Twitter

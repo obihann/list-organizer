@@ -6,6 +6,12 @@ var twitter = new twitterAPI({
     consumerKey: 'zbrlCUa6FLzVujrmwYIpGYtFA',
     consumerSecret: 'iRbfp6Q00hDv2jvRtWzzyAq5XklpaVfvEVJ9kcgr4Ip0OrU03m',
 });
+var redis = require('redis'), 
+    client = redis.createClient();
+
+client.on("error", function (err) {
+    console.log("Error " + err);
+});
 
 var express = require('express');
 var app = express();
@@ -16,14 +22,16 @@ app.set('view engine', 'jade');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 
+var title = 'Twitter List Tool';
+
 app.get('/', function(req, res) {
-    res.render('index', { title: 'Hello, World!', message: "Welcome"})
+    res.render('index', { title: title, message: "Easily manager your twitter lists and organize who you follow."})
 });
 
 app.get('/signin', function(req, res) {
     twitter.getRequestToken(function(error, requestToken, requestTokenSecret, results){
         if (error) {
-            res.render('index', { title: 'Get Request Token', message: JSON.stringify(error)})
+            res.render('index', { title: title, message: JSON.stringify(error)})
         } else {
             res.redirect('https://twitter.com/oauth/authenticate?oauth_token='+requestToken);
         }
