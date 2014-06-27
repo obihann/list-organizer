@@ -40,12 +40,12 @@ app.get('/signin', function(req, res) {
 });
 
 app.get('/callback', function(req, res) {
-    res.render('index', { title: 'Callback', message: 'Your being called back'})
+    console.log(req.query);
     twitter.getAccessToken(requestToken, requestTokenSecret, oauth_verifier, function(error, accessToken, accessTokenSecret, results) {
         if (error) {
-            res.render('index', { title: 'Get Request Token', message: JSON.stringify(error)})
+            res.render('index', { title: title, message: JSON.stringify(error)})
         } else {
-            res.render('index', { title: 'Done', message: 'Look what we did'})
+            res.render('index', { title: title, message: 'Look what we did'})
         }
     });
 });
