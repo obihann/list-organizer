@@ -39,7 +39,7 @@ app.get('/signin', function(req, res) {
 });
 
 app.get('/callback', function(req, res) {
-    twitter.getAccessToken(req.session.requestToken, req.session.requestTokenSecret, req.query.oauth_verifier, function(error, accessToken, accessTokenSecret, results) {
+    twitter.getAccessToken(req.session.requestToken, {}, req.session.requestTokenSecret, req.query.oauth_verifier, function(error, accessToken, accessTokenSecret, results) {
         if (error) {
             res.render('index', { title: title, message: JSON.stringify(error)})
         } else {
