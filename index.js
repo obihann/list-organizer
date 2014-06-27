@@ -7,14 +7,22 @@ var twitter = new twitterAPI({
     consumerSecret: 'iRbfp6Q00hDv2jvRtWzzyAq5XklpaVfvEVJ9kcgr4Ip0OrU03m',
     callback: 'http://list-organizer.herokuapp.com/callback'
 });
-var redis = require('redis')
-    ,client = redis.createClient();
-var session = require('express-session')
-    ,RedisStore = require('connect-redis')(session);
+/*
+ *var redis = require('redis')
+ *    ,client = redis.createClient();
+ *var session = require('express-session')
+ *    ,RedisStore = require('connect-redis')(session);
+ */
 var express = require('express');
+var store = new express.session.MemoryStore;
 var app = express();
 
-app.use(session({ store: new RedisStore(), secret: 'keyboard cat' }));
+/*
+ *app.use(session({ store: new RedisStore(), secret: 'keyboard cat' }));
+ */
+
+app.use(express.cookieParser());
+app.use(express.session({ secret: 'secret', store: store }))
 app.use(express.static(__dirname + '/public'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
