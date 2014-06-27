@@ -1,28 +1,19 @@
 var path = require ('path');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var connect = require('connect');
+var express = require('express');
+var session = require('express-session');
+
 var twitterAPI = require('node-twitter-api');
 var twitter = new twitterAPI({
     consumerKey: 'zbrlCUa6FLzVujrmwYIpGYtFA',
     consumerSecret: 'iRbfp6Q00hDv2jvRtWzzyAq5XklpaVfvEVJ9kcgr4Ip0OrU03m',
     callback: 'http://list-organizer.herokuapp.com/callback'
 });
-/*
- *var redis = require('redis')
- *    ,client = redis.createClient();
- *var session = require('express-session')
- *    ,RedisStore = require('connect-redis')(session);
- */
-var express = require('express');
-var store = new express.session.MemoryStore;
+
 var app = express();
 
-/*
- *app.use(session({ store: new RedisStore(), secret: 'keyboard cat' }));
- */
-
-app.use(express.cookieParser());
-app.use(express.session({ secret: 'secret', store: store }))
+app.use(session({secret: 'keyboard cat'}));
 app.use(express.static(__dirname + '/public'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
