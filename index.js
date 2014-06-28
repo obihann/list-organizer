@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var async = require('async');
 var path = require ('path');
 var bodyParser = require('body-parser');
@@ -68,11 +69,40 @@ app.get('/list', function(req, res) {
                 });
             },
             function(callback) {
-                twitter.lists('list', {}, req.session.accessToken, req.session.accessTokenSecret, function(error, data, response) {
+                async.waterfall([
+                    function(callback) {
+                        twitter.lists('list', {}, req.session.accessToken, req.session.accessTokenSecret, function(error, data, response) {
+                            if (error) {
+                                callback(error, null);
+                            } else {
+                                callback(null, data);
+                            }
+                        });
+                    },
+                    function(lists, callback) {
+                        var users = new Array();
+                        async.each(lists, function(list, callback) {
+                            twitter.lists('members', {list_id: list.id}, req.session.accessToken, req.session.accessTokenSecret, function(error, data, response) {
+                                if (error) {
+                                    callback(error);
+                                } else {
+                                    users = users.concat(data.users);
+                                    callback();
+                                }
+                            });
+                        }, function(error) {
+                            if (error) {
+                                callback(error, null);
+                            } else {
+                                callback(null, users);
+                            }
+                        });
+                    }
+                ], function(error, users) {
                     if (error) {
                         callback(error, null);
                     } else {
-                        callback(null, data);
+                        callback(null, users);
                     }
                 });
             }
@@ -80,7 +110,12 @@ app.get('/list', function(req, res) {
             if(error) {
                 res.render('error', {title: title, errors: error});
             } else {
-                res.render('list', { title: title, friends: data[0], lists: data[1]})
+                async.filter(data[1], function(item, callback) {
+                    // match against a user object, if found then he is in a list
+                    callback(true);
+                }, function(lost) {
+                    res.render('list', { title: title, friends: lost})
+                });
             }
         });
     }
