@@ -1,3 +1,4 @@
+var async = require('async');
 var path = require ('path');
 var bodyParser = require('body-parser');
 var connect = require('connect');
@@ -8,7 +9,8 @@ var twitterAPI = require('node-twitter-api');
 var twitter = new twitterAPI({
     consumerKey: 'zbrlCUa6FLzVujrmwYIpGYtFA',
     consumerSecret: 'iRbfp6Q00hDv2jvRtWzzyAq5XklpaVfvEVJ9kcgr4Ip0OrU03m',
-    callback: 'http://list-organizer.herokuapp.com/callback'
+    callback: 'http://localhost:3000/callback'
+    //callback: 'http://list-organizer.herokuapp.com/callback'
 });
 
 var app = express();
@@ -39,15 +41,49 @@ app.get('/signin', function(req, res) {
 });
 
 app.get('/callback', function(req, res) {
-    twitter.getAccessToken(req.session.requestToken, {}, req.session.requestTokenSecret, req.query.oauth_verifier, function(error, accessToken, accessTokenSecret, results) {
+    twitter.getAccessToken(req.session.requestToken, req.session.requestTokenSecret, req.query.oauth_verifier, function(error, accessToken, accessTokenSecret, results) {
         if (error) {
             res.render('index', { title: title, message: JSON.stringify(error)})
         } else {
-            twitter.friends('list', accessToken, accessTokenSecret, function(error, data, response) {
-                res.render('index', { title: title, message: JSON.stringify(data)})
-            });
+            req.session.accessToken = accessToken;
+            req.session.accessTokenSecret = accessTokenSecret;
+
+            res.redirect('/list');
         }
     });
+});
+
+app.get('/list', function(req, res) {
+    if (typeof req.session.accessToken === 'undefined' || typeof req.session.accessTokenSecret == 'undefined') {
+        res.redirect('/');
+    } else {
+        async.parallel([
+            function(callback) {
+                twitter.friends('list', {count: 200}, req.session.accessToken, req.session.accessTokenSecret, function(error, data, response) {
+                    if (error) {
+                        callback(error, null);
+                    } else {
+                        callback(null, data.users);
+                    }
+                });
+            },
+            function(callback) {
+                twitter.lists('list', {}, req.session.accessToken, req.session.accessTokenSecret, function(error, data, response) {
+                    if (error) {
+                        callback(error, null);
+                    } else {
+                        callback(null, data);
+                    }
+                });
+            }
+        ], function(error, data) {
+            if(error) {
+                res.render('error', {title: title, errors: error});
+            } else {
+                res.render('list', { title: title, friends: data[0], lists: data[1]})
+            }
+        });
+    }
 });
 
 var port = process.env.PORT || 3000;

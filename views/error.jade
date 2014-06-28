@@ -4,11 +4,11 @@ head
     link(rel='stylesheet', href='/vendor/bootstrap/css/bootstrap-theme.min.css')
     script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js')
 body
-    header.navbar.bg-primary
+    header.navbar.bg-danger
             h1.text-center= title
-    .container
-        .row
-            .col-xs-12
-                div.center-block.text-center
-                    h2= message 
-                    a(href='/signin', class='btn btn-default') Sign In With Twitter
+    .container-fluid
+        .row.text-center
+            .col-xs-2.bg-warning.col-xs-offset-4
+                ul.list-unstyled
+                    each error in errors
+                        li= error.message
